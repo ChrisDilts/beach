@@ -57,7 +57,7 @@
                 "Properties" : {
                     "VpcId" : {"Ref" : "VPCname"},
                     "CidrBlock" : {"Ref" : "VPCpublicSubnet1"},
-                    "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPCname"},"PubSubnet1"]}}]
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PubSubnet1"]}}]
                 }
             },
             "VPCpublicSubnet2resource" : {
@@ -65,7 +65,7 @@
                 "Properties" : {
                     "VpcId" : {"Ref" : "VPCname"},
                     "CidrBlock" : {"Ref" : "VPCpublicSubnet2"},
-                    "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPCname"},"PubSubnet2"]}}]
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PubSubnet2"]}}]
                 }
             },
             "VPCprivateSubnet1resource" : {
@@ -73,7 +73,7 @@
                 "Properties" : {
                     "VpcId" : {"Ref" : "VPCname"},
                     "CidrBlock" : {"Ref" : "VPCprivSubnet1"},
-                    "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPCname"},"PrivSubnet1"]}}]
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PrivSubnet1"]}}]
                 }
             },
             "VPCprivateSubnet2resource" : {
@@ -81,7 +81,7 @@
                 "Properties" : {
                     "VpcId" : {"Ref" : "VPCname"},
                     "CidrBlock" : {"Ref" : "VPCprivSubnet2"},
-                    "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPCname"},"PrivSubnet2"]}}]
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PrivSubnet2"]}}]
                 }
             },
             "IGW" : {
