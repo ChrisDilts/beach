@@ -1,3 +1,4 @@
+
 {
 "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "",
@@ -5,35 +6,15 @@
 
     },
     "Parameters": {
-        "VPC-Cider" : {
+        "VPCcidr" : {
             "Description" : "CIDR range for the VPC",
-            "Type" : "AWS::EC2::VPCCidrBlock",
+            "Type" : "String",
             "Default" : "10.0.0.0/26"
         },
-        "VPC-Name" : {
+        "VPCname" : {
             "Description" : "Name of the VPC",
             "Type" : "String",
             "Default" : "MyVPC"
-        },
-        "VPC-Public-Subnet-1" : {
-            "Description" : "Public Subnet #1",
-            "Type" : "AWS::EC2::Subnet",
-            "Default" : ""
-        },
-        "VPC-Public-Subnet-2" : {
-            "Description" : "Public Subnet #2",
-            "Type" : "AWS::EC2::Subnet",
-            "Default" : ""
-        },
-        "VPC-Private-Subnet-1" : {
-            "Description" : "Private Subnet #1",
-            "Type" : "AWS::EC2::Subnet",
-            "Default" : ""
-        },
-        "VPC-Private-Subnet-2" : {
-            "Description" : "Private Subnet #2",
-            "Type" : "AWS::EC2::Subnet",
-            "Default" : ""
         }
     },
     "Mappings": {
@@ -47,42 +28,79 @@
         "VPC": {
           "Type": "AWS::EC2::VPC",
           "Properties": {
-            "CidrBlock": {"Ref" : "VPC-Cider"},
+            "CidrBlock": "10.0.0.0/16",
             "EnableDnsSupport" : "true",
             "EnableDnsHostnames" : "true",
-            "Tags": [{"Key" : "Name" , "Value" : {"Ref" : "VPC-Name"}}]
+            "Tags": [{"Key" : "Name" , "Value" : {"Ref" : "VPCname"}}]
           }
         },
-        "VPC-Pub-Subnet-1" : {
+        "VPCpublicSubnet1" : {
             "Type" : "AWS::EC2::Subnet",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPC-Name"},
-                "CidrBlock" : {"Ref" : "VPC-Public-Subnet-1"},
-                "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPC-Name"},"PubSubnet1"]}}]
+                "VpcId" : {"Ref" : "VPCname"},
+                "CidrBlock" : "10.0.1.0/26",
+                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PubSubnet1"]]}}]
             }
         },
-        "VPC-Pub-Subnet-2" : {
+        "VPCpublicSubnet2" : {
             "Type" : "AWS::EC2::Subnet",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPC-Name"},
-                "CidrBlock" : {"Ref" : "VPC-Public-Subnet-2"},
-                "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPC-Name"},"PubSubnet2"]}}]
+                "VpcId" : {"Ref" : "VPCname"},
+                "CidrBlock" : "10.0.2.0/26",
+                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[ {"Ref" : "VPCname"},"PubSubnet2"]]}}]
             }
         },
-        "VPC-Priv-Subnet-1" : {
+        "VPCprivateSubnet1" : {
             "Type" : "AWS::EC2::Subnet",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPC-Name"},
-                "CidrBlock" : {"Ref" : "VPC-Private-Subnet-1"},
-                "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPC-Name"},"PrivSubnet1"]}}]
+                "VpcId" : {"Ref" : "VPCname"},
+                "CidrBlock" : "10.0.3.0/26",
+                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet1"]]}}]
             }
         },
-        "VPC-Priv-Subnet-2" : {
+        "VPCprivateSubnet2" : {
             "Type" : "AWS::EC2::Subnet",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPC-Name"},
-                "CidrBlock" : {"Ref" : "VPC-Private-Subnet-2"},
-                "Tags" : [{"Key" : "Name", "Value" : {"fn::join" : ["",{"Ref" : "VPC-Name"},"PrivSubnet2"]}}]
+                "VpcId" : {"Ref" : "VPCname"},
+                "CidrBlock" : "10.0.4.0/26",
+                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet2"]]}}]
+            }
+        },
+        "IGW" : {
+            "Type" : "AWS::EC2::InternetGateway"
+        },
+        "GatewayToInternet" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : {"Ref" : "VPC"},
+                "InternetGatewayId" : {"Ref" : "IGW"}
+            }
+        },
+        "PublicRouteTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : {"Ref" : "VPC"}
+            }
+        },
+        "PublicRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "DependsOn" : "GatewayToInternet",
+            "Properties" : {
+                "RouteTableId" : {"Ref" : "PublicRouteTable"},
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : {"Ref" : "IGW"}
+            }
+        },
+        "PubSubnetRouteTableAssn" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCpubSubnet1"}
+            }
+        },
+        "PubSubnetRouteTableAssn2" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCpubSubnet2"}
             }
         }
     },
@@ -93,19 +111,19 @@
         },
         "PubSubnet1" : {
             "Description" : "Public Subnet 1",
-            "Value" : {"Ref" : "VPC-Public-Subnet-1"}
+            "Value" : {"Ref" : "VPCpubSubnet1"}
         },
         "PubSubnet2" : {
             "Description" : "Public Subnet 2",
-            "Value" : {"Ref" : "VPC-Public-Subnet-2"}
+            "Value" : {"Ref" : "VPCpubSubnet2"}
         },
         "PrivSubnet1" : {
             "Description" : "Private Subnet 1",
-            "Value" : {"Ref" : "VPC-Private-Subnet-1"}
+            "Value" : {"Ref" : "VPCprivSubnet1"}
         },
         "PrivSubnet2" : {
             "Description" : "Private Subnet 2",
-            "Value" : {"Ref" : "VPC-Private-Subnet-2"}
+            "Value" : {"Ref" : "VPCprivSubnet2"}
         }
     }
 }
