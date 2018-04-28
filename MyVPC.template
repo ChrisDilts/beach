@@ -9,26 +9,40 @@
         "VPCcidr" : {
             "Description" : "CIDR range for the VPC",
             "Type" : "String",
-            "Default" : "10.0.0.0/26"
+            "Default" : "10.0.0.0/16"
         },
         "VPCname" : {
             "Description" : "Name of the VPC",
             "Type" : "String",
             "Default" : "MyVPC"
+        },
+        "PublicSubnet1Param" : {
+            "Description" : "Public Subnet 1",
+            "Type" : "String",
+            "Default" : "10.0.1.0/24"  
+        },
+        "PublicSubnet2Param" : {
+            "Description" : "Public Subnet 2",
+            "Type" : "String",
+            "Default" : "10.0.2.0/24"  
+        },
+        "PrivateSubnet1Param" : {
+            "Description" : "Private Subnet 1",
+            "Type" : "String",
+            "Default" : "10.0.3.0/24"  
+        },
+        "PrivateSubnet2Param" : {
+            "Description" : "Private Subnet 2",
+            "Type" : "String",
+            "Default" : "10.0.5.0/24"  
         }
-    },
-    "Mappings": {
-
-    },
-    "Conditions": {
-
     },
     "Resources": {
         
         "VPC": {
           "Type": "AWS::EC2::VPC",
           "Properties": {
-            "CidrBlock": "10.0.0.0/16",
+            "CidrBlock": {"Ref" : "VPCcidr"},
             "EnableDnsSupport" : "true",
             "EnableDnsHostnames" : "true",
             "Tags": [{"Key" : "Name" , "Value" : {"Ref" : "VPCname"}}]
@@ -36,33 +50,37 @@
         },
         "VPCpublicSubnet1" : {
             "Type" : "AWS::EC2::Subnet",
+            "DependsOn" : "VPC",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPCname"},
-                "CidrBlock" : "10.0.1.0/26",
+                "VpcId" : {"Ref" : "VPC"},
+                "CidrBlock" : {"Ref" : "PublicSubnet1Param"},
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PubSubnet1"]]}}]
             }
         },
         "VPCpublicSubnet2" : {
             "Type" : "AWS::EC2::Subnet",
+            "DependsOn" : "VPC",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPCname"},
-                "CidrBlock" : "10.0.2.0/26",
+                "VpcId" : {"Ref" : "VPC"},
+                "CidrBlock" : {"Ref" : "PublicSubnet2Param"},
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[ {"Ref" : "VPCname"},"PubSubnet2"]]}}]
             }
         },
         "VPCprivateSubnet1" : {
             "Type" : "AWS::EC2::Subnet",
+            "DependsOn" : "VPC",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPCname"},
-                "CidrBlock" : "10.0.3.0/26",
+                "VpcId" : {"Ref" : "VPC"},
+                "CidrBlock" : {"Ref" : "PrivateSubnet1Param"}, 
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet1"]]}}]
             }
         },
         "VPCprivateSubnet2" : {
             "Type" : "AWS::EC2::Subnet",
+            "DependsOn" : "VPC",
             "Properties" : {
-                "VpcId" : {"Ref" : "VPCname"},
-                "CidrBlock" : "10.0.4.0/26",
+                "VpcId" : {"Ref" : "VPC"},
+                "CidrBlock" :  {"Ref" : "PrivateSubnet2Param"}, 
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet2"]]}}]
             }
         },
@@ -78,6 +96,7 @@
         },
         "PublicRouteTable" : {
             "Type" : "AWS::EC2::RouteTable",
+            "DependsOn" : "VPC",
             "Properties" : {
                 "VpcId" : {"Ref" : "VPC"}
             }
@@ -93,14 +112,18 @@
         },
         "PubSubnetRouteTableAssn" : {
             "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn" : "VPCpublicSubnet1",
             "Properties" : {
-                "SubnetId" : {"Ref" : "VPCpubSubnet1"}
+                "SubnetId" : {"Ref" : "VPCpublicSubnet1"},
+                "RouteTableId" : {"Ref" : "PublicRouteTable"}
             }
         },
         "PubSubnetRouteTableAssn2" : {
             "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn" : "VPCpublicSubnet2",
             "Properties" : {
-                "SubnetId" : {"Ref" : "VPCpubSubnet2"}
+                "SubnetId" : {"Ref" : "VPCpublicSubnet2"},
+                "RouteTableId" : {"Ref" : "PublicRouteTable"}
             }
         }
     },
@@ -111,19 +134,19 @@
         },
         "PubSubnet1" : {
             "Description" : "Public Subnet 1",
-            "Value" : {"Ref" : "VPCpubSubnet1"}
+            "Value" : {"Ref" : "VPCpublicSubnet1"}
         },
         "PubSubnet2" : {
             "Description" : "Public Subnet 2",
-            "Value" : {"Ref" : "VPCpubSubnet2"}
+            "Value" : {"Ref" : "VPCpublicSubnet2"}
         },
         "PrivSubnet1" : {
             "Description" : "Private Subnet 1",
-            "Value" : {"Ref" : "VPCprivSubnet1"}
+            "Value" : {"Ref" : "VPCprivateSubnet1"}
         },
         "PrivSubnet2" : {
             "Description" : "Private Subnet 2",
-            "Value" : {"Ref" : "VPCprivSubnet2"}
+            "Value" : {"Ref" : "VPCprivateSubnet2"}
         }
     }
 }
