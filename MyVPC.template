@@ -54,6 +54,7 @@
             "Properties" : {
                 "VpcId" : {"Ref" : "VPC"},
                 "CidrBlock" : {"Ref" : "PublicSubnet1Param"},
+                "AvailabilityZone" : "us-east-1a",
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PubSubnet1"]]}}]
             }
         },
@@ -63,6 +64,7 @@
             "Properties" : {
                 "VpcId" : {"Ref" : "VPC"},
                 "CidrBlock" : {"Ref" : "PublicSubnet2Param"},
+                "AvailabilityZone" : "us-east-1b",
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[ {"Ref" : "VPCname"},"PubSubnet2"]]}}]
             }
         },
@@ -72,6 +74,7 @@
             "Properties" : {
                 "VpcId" : {"Ref" : "VPC"},
                 "CidrBlock" : {"Ref" : "PrivateSubnet1Param"}, 
+                "AvailabilityZone" : "us-east-1a",
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet1"]]}}]
             }
         },
@@ -81,6 +84,7 @@
             "Properties" : {
                 "VpcId" : {"Ref" : "VPC"},
                 "CidrBlock" :  {"Ref" : "PrivateSubnet2Param"}, 
+                "AvailabilityZone" : "us-east-1b",
                 "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet2"]]}}]
             }
         },
@@ -101,6 +105,13 @@
                 "VpcId" : {"Ref" : "VPC"}
             }
         },
+        "PrivateRouteTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "DependsOn" : "VPC",
+            "Properties" : {
+                "VpcId" : {"Ref" : "VPC"}
+            }
+        },
         "PublicRoute" : {
             "Type" : "AWS::EC2::Route",
             "DependsOn" : "GatewayToInternet",
@@ -108,6 +119,22 @@
                 "RouteTableId" : {"Ref" : "PublicRouteTable"},
                 "DestinationCidrBlock" : "0.0.0.0/0",
                 "GatewayId" : {"Ref" : "IGW"}
+            }
+        },
+        "PrivSubnetRouteTableAssn" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn" : "VPCprivateSubnet1",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCprivateSubnet1"},
+                "RouteTableId" : {"Ref" : "PrivateRouteTable"}
+            }
+        },
+        "PrivSubnetRouteTableAssn2" : {
+            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+            "DependsOn" : "VPCprivateSubnet2",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCprivateSubnet2"},
+                "RouteTableId" : {"Ref" : "PrivateRouteTable"}
             }
         },
         "PubSubnetRouteTableAssn" : {

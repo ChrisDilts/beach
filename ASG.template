@@ -1,0 +1,85 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Build: Autoscaling Group, Launch Configuration",
+    "Metadata": {
+
+    },
+    "Parameters": {
+        "VPC" : {
+            "Description" : "Which VPC to build in.",
+            "Type" : "List<AWS::EC2::VPC::Id"
+        },
+        "KeyPair" : {
+            "Description" : "Select the KeyPair to use.",
+            "Type" : "List<AWS::EC2::KeyPair::KeyName>",
+            "Default" : "BeachCastle"
+        },
+        "EC2ImageId" : {
+            "Description" : "EC2 Image ID.",
+            "Type" : "String",
+            "Default" : "ami-467ca739"
+        },
+        "EC2InstanceType" : {
+            "Description" : "Instance size",
+            "Type" : "String",
+            "Default" : "t2.micro",
+            "AllowedValues" : [ "t2.micro", "t2.small", "t2.medium"],
+            "ConstraintDescription" : "Must be allowed EC2 type."
+        }
+    },
+    "Resources": {
+        "ASGSecurityGroupHTTP" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Allow http ingress",
+                "VpcId" : {"Ref" : "VPC"},
+                "SecurityGroupIngress" : [{
+                    "IpProtocol" : "-1",
+                    "FromPort" : "80",
+                    "ToPort" : "80",
+                    "CidrIp" : "174.101.210.213/32"
+                }],
+                "SecurityGroupEgress" : [{
+                    "IpProtocol" : "-1",
+                    "FromPort" : "80",
+                    "ToPort" : "80",
+                    "CidrIp" : "174.101.210.213/32"
+                }]
+            }
+        },
+        "ASGSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Allow inter-SG communication",
+                "VpcId" : {"Ref" : "VPC"},
+                "SecurityGroupIngress" : [{
+                    "IpProtocol" : "-1",
+                    "CidrIp" : "10.0.0.0/16"
+                }],
+                "SecurityGroupEgress" : [{
+                    "IpProtocol" : "-1",
+                    "CidrIp" : "10.0.0.0/16"
+                }]
+            }
+        },
+        "LaunchConfig" : {
+            "Type" : "AWS::AutoScaling::LaunchConfiguration",
+            "DependsOn" : "ASGSecurityGroup",
+            "Properties" : {
+                "KeyName" : {"Ref" : "KeyPair"},
+                "ImageId" : {"Ref" : "EC2ImageId"},
+                "SecurityGroups" : [{"Ref" : "ASGSecurityGroupHTTP"},{"Ref" : "ASGSecurityGroup"}],
+                "InstanceType" : {"Ref" : "EC2InstanceType"}
+            }
+        },
+        "ASG" : {
+            "Type" : "AWS::EC2::AutoScalingGroup",
+            "Properties" : {
+                "AvailabilityZones" : ["us-east-1a","us-east-1b"]
+            }
+        }
+    },
+    "Outputs": {
+
+    }
+}
