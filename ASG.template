@@ -7,7 +7,12 @@
     "Parameters": {
         "VPC" : {
             "Description" : "Which VPC to build in.",
-            "Type" : "List<AWS::EC2::VPC::Id"
+            "Type" : "List<AWS::EC2::VPC::Id>"
+        },
+        "ASGsubnets" : {
+            "Description" : "List of subnets to deploy ASG instances into.",
+            "Type" : "List<AWS::EC2::Subnet::Id>",
+            "ConstraintDescription" : "Must be at least 2 subnets in 2 AZ's in the same VPC."
         },
         "KeyPair" : {
             "Description" : "Select the KeyPair to use.",
@@ -73,9 +78,15 @@
             }
         },
         "ASG" : {
-            "Type" : "AWS::EC2::AutoScalingGroup",
+            "Type" : "AWS::Autoscaling::AutoScalingGroup",
             "Properties" : {
-                "AvailabilityZones" : ["us-east-1a","us-east-1b"]
+                "AutoscalingGroupName" : "BeachCastleASG",
+                "VPCZoneIdentifier" : {"Ref" : "ASGsubnets"},
+                "Cooldown" : "60",
+                "DesiredCapacity" : "2",
+                "LaunchConfigurationName" : "LaunchConfig",
+                "MaxSize" : "2",
+                "MinSize" : "1"                
             }
         }
     },
