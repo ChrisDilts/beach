@@ -1,7 +1,7 @@
 
 {
 "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "",
+    "Description": "Build: VPC, Subnets, IGW, Routes, nACL",
     "Metadata": {
 
     },
@@ -124,6 +124,65 @@
             "Properties" : {
                 "SubnetId" : {"Ref" : "VPCpublicSubnet2"},
                 "RouteTableId" : {"Ref" : "PublicRouteTable"}
+            }
+        },
+        "NetworkACL" : {
+            "Type" : "AWS::EC2::NetworkAcl",
+            "Properties" : {
+                "VpcId" : {"Ref" : "VPC"},
+                "Tags" : [
+                    {"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "AWS::StackName"}," - NetworkAcl"]]}}
+                ]
+            }
+        },
+        "NetworkAclEgressEntry" : {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : {"Ref" : "NetworkACL"},
+                "RuleNumber" : "101",
+                "Protocol" : "-1",
+                "RuleAction" : "Allow",
+                "Egress" : "true",
+                "CidrBlock" : "0.0.0.0/0"
+            }
+        },
+        "NetworkAclIngressEntry" : {
+            "Type" : "AWS::EC2::NetworkAclEntry",
+            "Properties" : {
+                "NetworkAclId" : {"Ref" : "NetworkACL"},
+                "RuleNumber" : "101",
+                "Protocol" : "-1",
+                "RuleAction" : "Allow",
+                "Egress" : "false",
+                "CidrBlock" : "0.0.0.0/0"
+            }
+        },
+        "NetworkAclSubnetAssociationPub1" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCpublicSubnet1"},
+                "NetworkAclId" : {"Ref" : "NetworkACL"}
+            }
+        },
+        "NetworkAclSubnetAssociationPub2" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCpublicSubnet2"},
+                "NetworkAclId" : {"Ref" : "NetworkACL"}
+            }
+        },
+        "NetworkAclSubnetAssociationPriv1" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCprivateSubnet1"},
+                "NetworkAclId" : {"Ref" : "NetworkACL"}
+            }
+        },
+        "NetworkAclSubnetAssociationPriv2" : {
+            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
+            "Properties" : {
+                "SubnetId" : {"Ref" : "VPCprivateSubnet2"},
+                "NetworkAclId" : {"Ref" : "NetworkACL"}
             }
         }
     },
