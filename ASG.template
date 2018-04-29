@@ -7,7 +7,8 @@
     "Parameters": {
         "VPC" : {
             "Description" : "Which VPC to build in.",
-            "Type" : "List<AWS::EC2::VPC::Id>"
+            "Type" : "String",
+            "Default" : "vpc-08c1410fa6ff98303"
         },
         "ASGsubnets" : {
             "Description" : "List of subnets to deploy ASG instances into.",
@@ -16,7 +17,7 @@
         },
         "KeyPair" : {
             "Description" : "Select the KeyPair to use.",
-            "Type" : "List<AWS::EC2::KeyPair::KeyName>",
+            "Type" : "String",
             "Default" : "BeachCastle"
         },
         "EC2ImageId" : {
@@ -33,6 +34,27 @@
         }
     },
     "Resources": {
+        "ASG" : {
+            "Type" : "AWS::AutoScaling::AutoScalingGroup",
+            "Properties" : {
+                "AutoScalingGroupName" : "BeachCastleASG",
+                "VPCZoneIdentifier" : {"Ref" : "ASGsubnets"},
+                "Cooldown" : "60",
+                "DesiredCapacity" : "2",
+                "LaunchConfigurationName" : {"Ref" : "ASGLaunchConfig"},
+                "MaxSize" : "2",
+                "MinSize" : "1"                
+            }
+        },
+        "ASGLaunchConfig" : {
+            "Type" : "AWS::AutoScaling::LaunchConfiguration",
+            "Properties" : {
+                "KeyName" : {"Ref" : "KeyPair"},
+                "ImageId" : {"Ref" : "EC2ImageId"},
+                "SecurityGroups" : [{"Ref" : "ASGSecurityGroupHTTP"},{"Ref" : "ASGSecurityGroup"}],
+                "InstanceType" : {"Ref" : "EC2InstanceType"}
+            }
+        },
         "ASGSecurityGroupHTTP" : {
             "Type" : "AWS::EC2::SecurityGroup",
             "Properties" : {
@@ -65,28 +87,6 @@
                     "IpProtocol" : "-1",
                     "CidrIp" : "10.0.0.0/16"
                 }]
-            }
-        },
-        "LaunchConfig" : {
-            "Type" : "AWS::AutoScaling::LaunchConfiguration",
-            "DependsOn" : "ASGSecurityGroup",
-            "Properties" : {
-                "KeyName" : {"Ref" : "KeyPair"},
-                "ImageId" : {"Ref" : "EC2ImageId"},
-                "SecurityGroups" : [{"Ref" : "ASGSecurityGroupHTTP"},{"Ref" : "ASGSecurityGroup"}],
-                "InstanceType" : {"Ref" : "EC2InstanceType"}
-            }
-        },
-        "ASG" : {
-            "Type" : "AWS::Autoscaling::AutoScalingGroup",
-            "Properties" : {
-                "AutoscalingGroupName" : "BeachCastleASG",
-                "VPCZoneIdentifier" : {"Ref" : "ASGsubnets"},
-                "Cooldown" : "60",
-                "DesiredCapacity" : "2",
-                "LaunchConfigurationName" : "LaunchConfig",
-                "MaxSize" : "2",
-                "MinSize" : "1"                
             }
         }
     },
