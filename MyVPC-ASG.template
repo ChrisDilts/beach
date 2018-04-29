@@ -34,18 +34,6 @@
         }
     },
     "Resources": {
-        "ASG" : {
-            "Type" : "AWS::AutoScaling::AutoScalingGroup",
-            "Properties" : {
-                "AutoScalingGroupName" : "BeachCastleASG",
-                "VPCZoneIdentifier" : {"Ref" : "ASGsubnets"},
-                "Cooldown" : "60",
-                "DesiredCapacity" : "2",
-                "LaunchConfigurationName" : {"Ref" : "ASGLaunchConfig"},
-                "MaxSize" : "2",
-                "MinSize" : "1"                
-            }
-        },
         "ASGLaunchConfig" : {
             "Type" : "AWS::AutoScaling::LaunchConfiguration",
             "Properties" : {
@@ -53,6 +41,19 @@
                 "ImageId" : {"Ref" : "EC2ImageId"},
                 "SecurityGroups" : [{"Ref" : "ASGSecurityGroupHTTP"},{"Ref" : "ASGSecurityGroup"}],
                 "InstanceType" : {"Ref" : "EC2InstanceType"}
+            }
+        },
+        "ASG" : {
+            "Type" : "AWS::AutoScaling::AutoScalingGroup",
+            "Properties" : {
+                "AutoScalingGroupName" : "BeachCastleASG",
+                "VPCZoneIdentifier" : {"Ref" : "ASGsubnets"},
+                "TargetGroupARNs" : [{"Ref" : "ALBtargetGroup"}],
+                "Cooldown" : "60",
+                "DesiredCapacity" : "2",
+                "LaunchConfigurationName" : {"Ref" : "ASGLaunchConfig"},
+                "MaxSize" : "2",
+                "MinSize" : "1"                
             }
         },
         "ASGSecurityGroupHTTP" : {
@@ -87,6 +88,36 @@
                     "IpProtocol" : "-1",
                     "CidrIp" : "10.0.0.0/16"
                 }]
+            }
+        },
+        "ALB" : {
+            "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties" : {
+                "Subnets" : {"Ref" : "ASGsubnets"}
+            }
+        },
+        "ALBListener" : {
+            "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties" : {
+                "DefaultAction" :[{
+                    "Type" : "forward",
+                    "TargetGroupArn" : {"Ref" : "ALBtargetGroup"}
+                }],
+                "LoadBalancerArn" : {"Ref" : "ALB"},
+                "Port" : "80",
+                "Protocol" : "HTTP"
+            }
+        },
+        "ALBtargetGroup" : {
+            "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "Properties" : {
+                "HealthCheckIntervalSeconds" : "20",
+                "HealthCheckTimeoutSeconds" : "5",
+                "HealthyThresholdCount" : "3",
+                "Port" : "80",
+                "Protocol" : "HTTP",
+                "UnhealthyThresholdCount" : 5,
+                "VpcId" : {"Ref" : "VPC"}
             }
         }
     },
