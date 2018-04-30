@@ -1,238 +1,147 @@
-
 {
-"AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Build: VPC, Subnets, IGW, Routes, nACL",
-    "Metadata": {
-
-    },
-    "Parameters": {
-        "VPCcidr" : {
-            "Description" : "CIDR range for the VPC",
-            "Type" : "String",
-            "Default" : "10.0.0.0/16"
+    "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "",
+        "Metadata": {
         },
-        "VPCname" : {
-            "Description" : "Name of the VPC",
-            "Type" : "String",
-            "Default" : "MyVPC"
-        },
-        "PublicSubnet1Param" : {
-            "Description" : "Public Subnet 1",
-            "Type" : "String",
-            "Default" : "10.0.1.0/24"  
-        },
-        "PublicSubnet2Param" : {
-            "Description" : "Public Subnet 2",
-            "Type" : "String",
-            "Default" : "10.0.2.0/24"  
-        },
-        "PrivateSubnet1Param" : {
-            "Description" : "Private Subnet 1",
-            "Type" : "String",
-            "Default" : "10.0.3.0/24"  
-        },
-        "PrivateSubnet2Param" : {
-            "Description" : "Private Subnet 2",
-            "Type" : "String",
-            "Default" : "10.0.5.0/24"  
-        }
-    },
-    "Resources": {
-        
-        "VPC": {
-          "Type": "AWS::EC2::VPC",
-          "Properties": {
-            "CidrBlock": {"Ref" : "VPCcidr"},
-            "EnableDnsSupport" : "true",
-            "EnableDnsHostnames" : "true",
-            "Tags": [{"Key" : "Name" , "Value" : {"Ref" : "VPCname"}}]
-          }
-        },
-        "VPCpublicSubnet1" : {
-            "Type" : "AWS::EC2::Subnet",
-            "DependsOn" : "VPC",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"},
-                "CidrBlock" : {"Ref" : "PublicSubnet1Param"},
-                "AvailabilityZone" : "us-east-1a",
-                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PubSubnet1"]]}}]
+        "Parameters": {
+            "VPCcidr" : {
+                "Description" : "CIDR range for the VPC",
+                "Type" : "AWS::EC2::VPCCidrBlock",
+                "Default" : "10.0.0.0/26"
+            },
+            "VPCname" : {
+                "Description" : "Name of the VPC",
+                "Type" : "String",
+                "Default" : "MyVPC"
+            },
+            "VPCpublicSubnet1" : {
+                "Description" : "Public Subnet #1",
+                "Type" : "AWS::EC2::Subnet",
+                "Default" : ""
+            },
+            "VPCpublicSubnet2" : {
+                "Description" : "Public Subnet #2",
+                "Type" : "AWS::EC2::Subnet",
+                "Default" : ""
+            },
+            "VPCprivSubnet1" : {
+                "Description" : "Private Subnet #1",
+                "Type" : "AWS::EC2::Subnet",
+                "Default" : ""
+            },
+            "VPCprivSubnet2" : {
+                "Description" : "Private Subnet #2",
+                "Type" : "AWS::EC2::Subnet",
+                "Default" : ""
             }
         },
-        "VPCpublicSubnet2" : {
-            "Type" : "AWS::EC2::Subnet",
-            "DependsOn" : "VPC",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"},
-                "CidrBlock" : {"Ref" : "PublicSubnet2Param"},
-                "AvailabilityZone" : "us-east-1b",
-                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[ {"Ref" : "VPCname"},"PubSubnet2"]]}}]
+        "Mappings": {
+    
+        },
+        "Conditions": {
+    
+        },
+        "Resources": {
+            
+            "VPC": {
+              "Type": "AWS::EC2::VPC",
+              "Properties": {
+                "CidrBlock": {"Ref" : "VPCcidr"},
+                "EnableDnsSupport" : "true",
+                "EnableDnsHostnames" : "true",
+                "Tags": [{"Key" : "Name" , "Value" : {"Ref" : "VPCname"}}]
+              }
+            },
+            "VPCpublicSubnet1resource" : {
+                "Type" : "AWS::EC2::Subnet",
+                "Properties" : {
+                    "VpcId" : {"Ref" : "VPCname"},
+                    "CidrBlock" : {"Ref" : "VPCpublicSubnet1"},
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PubSubnet1"]}}]
+                }
+            },
+            "VPCpublicSubnet2resource" : {
+                "Type" : "AWS::EC2::Subnet",
+                "Properties" : {
+                    "VpcId" : {"Ref" : "VPCname"},
+                    "CidrBlock" : {"Ref" : "VPCpublicSubnet2"},
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PubSubnet2"]}}]
+                }
+            },
+            "VPCprivateSubnet1resource" : {
+                "Type" : "AWS::EC2::Subnet",
+                "Properties" : {
+                    "VpcId" : {"Ref" : "VPCname"},
+                    "CidrBlock" : {"Ref" : "VPCprivSubnet1"},
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PrivSubnet1"]}}]
+                }
+            },
+            "VPCprivateSubnet2resource" : {
+                "Type" : "AWS::EC2::Subnet",
+                "Properties" : {
+                    "VpcId" : {"Ref" : "VPCname"},
+                    "CidrBlock" : {"Ref" : "VPCprivSubnet2"},
+                    "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",{"Ref" : "VPCname"},"PrivSubnet2"]}}]
+                }
+            },
+            "IGW" : {
+                "Type" : "AWS::EC2::InternetGateway"
+            },
+            "GatewayToInternet" : {
+                "Type" : "AWS::EC2::VPCGatewayAttachment",
+                "Properties" : {
+                    "VpcId" : {"Ref" : "VPC"},
+                    "InternetGatewayId" : {"Ref" : "IGW"}
+                }
+            },
+            "PublicRouteTable" : {
+                "Type" : "AWS::EC2::RouteTable",
+                "Properties" : {
+                    "VpcId" : {"Ref" : "VPC"}
+                }
+            },
+            "PublicRoute" : {
+                "Type" : "AWS::EC2::Route",
+                "DependsOn" : "GatewayToInternet",
+                "Properties" : {
+                    "RouteTableId" : {"Ref" : "PublicRouteTable"},
+                    "DestinationCidrBlock" : "0.0.0.0/0",
+                    "GatewayId" : {"Ref" : "IGW"}
+                }
+            },
+            "PubSubnetRouteTableAssn" : {
+                "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+                "Properties" : {
+                    "SubnetId" : {"Ref" : "VPCpublicSubnet1"}
+                }
+            },
+            "PubSubnetRouteTableAssn2" : {
+                "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+                "Properties" : {
+                    "SubnetId" : {"Ref" : "VPCpublicSubnet2"}
+                }
             }
         },
-        "VPCprivateSubnet1" : {
-            "Type" : "AWS::EC2::Subnet",
-            "DependsOn" : "VPC",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"},
-                "CidrBlock" : {"Ref" : "PrivateSubnet1Param"}, 
-                "AvailabilityZone" : "us-east-1a",
-                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet1"]]}}]
+        "Outputs": {
+            "VpcId" : {
+                "Description" : "ID of the VPC",
+                "Value" : {"Ref" : "VPC"}
+            },
+            "PubSubnet1" : {
+                "Description" : "Public Subnet 1",
+                "Value" : {"Ref" : "VPCpublicSubnet1"}
+            },
+            "PubSubnet2" : {
+                "Description" : "Public Subnet 2",
+                "Value" : {"Ref" : "VPCpublicSubnet2"}
+            },
+            "PrivSubnet1" : {
+                "Description" : "Private Subnet 1",
+                "Value" : {"Ref" : "VPCprivSubnet1"}
+            },
+            "PrivSubnet2" : {
+                "Description" : "Private Subnet 2",
+                "Value" : {"Ref" : "VPCprivSubnet2"}
             }
-        },
-        "VPCprivateSubnet2" : {
-            "Type" : "AWS::EC2::Subnet",
-            "DependsOn" : "VPC",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"},
-                "CidrBlock" :  {"Ref" : "PrivateSubnet2Param"}, 
-                "AvailabilityZone" : "us-east-1b",
-                "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "VPCname"},"PrivSubnet2"]]}}]
-            }
-        },
-        "IGW" : {
-            "Type" : "AWS::EC2::InternetGateway"
-        },
-        "GatewayToInternet" : {
-            "Type" : "AWS::EC2::VPCGatewayAttachment",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"},
-                "InternetGatewayId" : {"Ref" : "IGW"}
-            }
-        },
-        "PublicRouteTable" : {
-            "Type" : "AWS::EC2::RouteTable",
-            "DependsOn" : "VPC",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"}
-            }
-        },
-        "PrivateRouteTable" : {
-            "Type" : "AWS::EC2::RouteTable",
-            "DependsOn" : "VPC",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"}
-            }
-        },
-        "PublicRoute" : {
-            "Type" : "AWS::EC2::Route",
-            "DependsOn" : "GatewayToInternet",
-            "Properties" : {
-                "RouteTableId" : {"Ref" : "PublicRouteTable"},
-                "DestinationCidrBlock" : "0.0.0.0/0",
-                "GatewayId" : {"Ref" : "IGW"}
-            }
-        },
-        "PrivSubnetRouteTableAssn" : {
-            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn" : "VPCprivateSubnet1",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCprivateSubnet1"},
-                "RouteTableId" : {"Ref" : "PrivateRouteTable"}
-            }
-        },
-        "PrivSubnetRouteTableAssn2" : {
-            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn" : "VPCprivateSubnet2",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCprivateSubnet2"},
-                "RouteTableId" : {"Ref" : "PrivateRouteTable"}
-            }
-        },
-        "PubSubnetRouteTableAssn" : {
-            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn" : "VPCpublicSubnet1",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCpublicSubnet1"},
-                "RouteTableId" : {"Ref" : "PublicRouteTable"}
-            }
-        },
-        "PubSubnetRouteTableAssn2" : {
-            "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-            "DependsOn" : "VPCpublicSubnet2",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCpublicSubnet2"},
-                "RouteTableId" : {"Ref" : "PublicRouteTable"}
-            }
-        },
-        "NetworkACL" : {
-            "Type" : "AWS::EC2::NetworkAcl",
-            "Properties" : {
-                "VpcId" : {"Ref" : "VPC"},
-                "Tags" : [
-                    {"Key" : "Name", "Value" : {"Fn::Join" : ["", [ {"Ref" : "AWS::StackName"}," - NetworkAcl"]]}}
-                ]
-            }
-        },
-        "NetworkAclEgressEntry" : {
-            "Type" : "AWS::EC2::NetworkAclEntry",
-            "Properties" : {
-                "NetworkAclId" : {"Ref" : "NetworkACL"},
-                "RuleNumber" : "101",
-                "Protocol" : "-1",
-                "RuleAction" : "Allow",
-                "Egress" : "true",
-                "CidrBlock" : "0.0.0.0/0"
-            }
-        },
-        "NetworkAclIngressEntry" : {
-            "Type" : "AWS::EC2::NetworkAclEntry",
-            "Properties" : {
-                "NetworkAclId" : {"Ref" : "NetworkACL"},
-                "RuleNumber" : "101",
-                "Protocol" : "-1",
-                "RuleAction" : "Allow",
-                "Egress" : "false",
-                "CidrBlock" : "0.0.0.0/0"
-            }
-        },
-        "NetworkAclSubnetAssociationPub1" : {
-            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCpublicSubnet1"},
-                "NetworkAclId" : {"Ref" : "NetworkACL"}
-            }
-        },
-        "NetworkAclSubnetAssociationPub2" : {
-            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCpublicSubnet2"},
-                "NetworkAclId" : {"Ref" : "NetworkACL"}
-            }
-        },
-        "NetworkAclSubnetAssociationPriv1" : {
-            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCprivateSubnet1"},
-                "NetworkAclId" : {"Ref" : "NetworkACL"}
-            }
-        },
-        "NetworkAclSubnetAssociationPriv2" : {
-            "Type" : "AWS::EC2::SubnetNetworkAclAssociation",
-            "Properties" : {
-                "SubnetId" : {"Ref" : "VPCprivateSubnet2"},
-                "NetworkAclId" : {"Ref" : "NetworkACL"}
-            }
-        }
-    },
-    "Outputs": {
-        "VpcId" : {
-            "Description" : "ID of the VPC",
-            "Value" : {"Ref" : "VPC"}
-        },
-        "PubSubnet1" : {
-            "Description" : "Public Subnet 1",
-            "Value" : {"Ref" : "VPCpublicSubnet1"}
-        },
-        "PubSubnet2" : {
-            "Description" : "Public Subnet 2",
-            "Value" : {"Ref" : "VPCpublicSubnet2"}
-        },
-        "PrivSubnet1" : {
-            "Description" : "Private Subnet 1",
-            "Value" : {"Ref" : "VPCprivateSubnet1"}
-        },
-        "PrivSubnet2" : {
-            "Description" : "Private Subnet 2",
-            "Value" : {"Ref" : "VPCprivateSubnet2"}
         }
     }
-}
