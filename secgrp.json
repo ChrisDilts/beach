@@ -1,0 +1,43 @@
+{
+"AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Security Group template",
+
+    "Parameters": {
+        "VPCid": {
+            "Description": "Select the VPC Id",
+            "Type": "String",
+            "Default": "MyVPC Id"
+        }
+    },
+    "Resources": {
+        
+        "secGrp" : {
+          "Type" : "AWS::EC2::SecurityGroup",
+          "Properties" : {
+            "GroupDescription" : "-",
+            "SecurityGroupIngress" : [ 
+              
+            ],
+            "VpcId" : {"Ref":"VPCid"},
+            "Tags" :  [{"Key":"Name", "Value" : { "Fn::Join" : [ "-", [ { "Ref" : "AWS::StackName" },"SecurityGroup" ] ] } } ]
+          }
+        },
+        "secGrpIngress" : {
+            "Type" : "AWS::EC2::SecurityGroupIngress",
+            "DependsOn" : "secGrp",
+            "Properties" : {
+                "GroupId" : {"Ref" : "secGrp"},
+                "IpProtocol" : "-1",
+                "FromPort" : "0",
+                "ToPort" : "65535",
+                "SourceSecurityGroupId" : {"Ref" : "secGrp"}
+            }
+        }
+    },
+    "Outputs": {
+        "SecurityGroupId": {
+            "Value" : {"Ref" : "secGrp"}
+        }
+
+    }
+}
