@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion : 2010-09-09
+Description: This temlate is used to create AWS Resources for CitrixCloud Proof-of-Concept 
+Parameters:
+  EC2count:
+    Description: Number of EC2 instances to use for Citrix VDI
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 20
+    ConstraintDescription: Must be a number between 1 and 20.
+  DomainControllerEC2image:
+    Description: AMI to use for EC2 domain controller instances. Default is Server 2012 R2.
+    Type: AWS::EC2::Image::Id
+    Default: ami-b8f3b5c7
+  CitrixConnectorEC2image:
+    Description: AMI to use for Citrix Cloud connector instances. Default is Server 2012 R2.
+    Type: AWS::EC2::Image::Id
+    Default: ami-b8f3b5c7
+  VDIEC2image:
+    Description: AMI to use for EC2 VDI instances.
+    Type: AWS::EC2::Image::Id
+  EC2instanceTypeForVDI:
+    Description: Size and class of EC2 instance to use for VDIs.
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small]
+    ConstraintDescription: t2.micro and t2.small allowed for PoC testing
+  EC2instanceTypeForDC:
+    Description: Size and class of EC2 instance to use for domain controller.
+    Type: String
+    Default: t2.small
+    AllowedValues: [t2.micro, t2.small]
+    ConstraintDescription: t2.micro and t2.small allowed for PoC testing
+  EC2instanceTypeForCitrixConnector:
+    Description: Size and class of EC2 instance to use for Citrix Connector.
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small]
+    ConstraintDescription: t2.micro and t2.small allowed for PoC testing
+  KeyName:
+    Description: The name of the key pair to enable RDP access
+    Type: AWS::EC2::KeyPair::KeyName
+  VPCsubnet:
+    Description: Which subnet to deply into.
+    Type: AWS::EC2::Subnet::Id
+  VpcId:
+    Description: VPC to use
+    Type: AWS::EC2::VPC::Id
+Resources: 
+  SecGroups:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      VpcId: !Ref VpcId
+      Tags:
+        -
+          Key: Name
+          Value: CitrixCloudPOC-SG          
+      GroupDescription: Enable RDP
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 10.0.0.0/8
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          SourceSecurityGroupId: sg-f31d9cb8    
+  DomainControllerEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref DomainControllerEC2image
+      InstanceType: !Ref EC2instanceTypeForDC
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          GroupSet: 
+            - !Ref SecGroups
+          DeviceIndex: 0
+          SubnetId: !Ref VPCsubnet
+      Tags:
+        -
+          Key: Name
+          Value: CitrixCloudDomainController
+  VDIinstance:
+    Type: AWS::EC2::Instance 
+    Properties:
+      ImageId: !Ref VDIEC2image
+      InstanceType: !Ref EC2instanceTypeForVDI
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          GroupSet: 
+            - !Ref SecGroups
+          DeviceIndex: 0
+          SubnetId: !Ref VPCsubnet
+      Tags:
+        -
+          Key: Name
+          Value: CitrixCloudVDI
+  ConnectorInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref CitrixConnectorEC2image
+      InstanceType: !Ref EC2instanceTypeForCitrixConnector
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: false
+          GroupSet: 
+            - !Ref SecGroups
+          DeviceIndex: 0
+          SubnetId: !Ref VPCsubnet
+      Tags:
+        -
+          Key: Name
+          Value: CitrixCloudConnector
